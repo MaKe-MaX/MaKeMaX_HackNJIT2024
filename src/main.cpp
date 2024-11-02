@@ -1,10 +1,12 @@
 #include <Arduino.h>
 #include <SPI.h>
+#include <stdio.h>
 #define SW 8
 #define joy_x A0
 #define joy_y A1
 #define ultrasonic 5 
 #include <Adafruit_CCS811.h>
+
 
 Adafruit_CCS811 AQsensor;
 
@@ -16,6 +18,7 @@ void setup()
   pinMode(joy_x, INPUT);
   pinMode(joy_y, INPUT);
   pinMode(SW, INPUT);
+
 }
 
 void loop()

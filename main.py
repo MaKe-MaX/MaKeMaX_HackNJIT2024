@@ -1,6 +1,7 @@
 import pygame
-import pip
+import serial
 import time
+
 
 # Initialize Pygame
 pygame.init()
@@ -25,11 +26,11 @@ movement_scale = 0.2  # Adjust this to scale movement to the screen size
 # Main loop
 running = True
 while running:
+    data = []
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
-    # Read data from Arduino
     if ser.in_waiting > 0:
         try:
             distance = int(ser.readline().decode().strip())  # Read and parse the distance value

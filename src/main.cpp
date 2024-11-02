@@ -3,7 +3,7 @@
 #define SW 8
 #define joy_x A0
 #define joy_y A1
-#define ultrasonic 5
+#define ultrasonic 5 
 #include <Adafruit_CCS811.h>
 
 Adafruit_CCS811 AQsensor;

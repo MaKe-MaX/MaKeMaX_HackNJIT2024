@@ -14,6 +14,7 @@ BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
+ORANGE = (206, 112, 43)
 
 bg = pygame.transform.scale(pygame.image.load(r"assets\backgrounds\orange_background.png"), (screen.get_width(), screen.get_height()))
 
@@ -21,6 +22,12 @@ bg = pygame.transform.scale(pygame.image.load(r"assets\backgrounds\orange_backgr
 sprite_sheet_walk = pygame.image.load(r"assets\player\hero_walking.png").convert_alpha()
 sprite_sheet_idle = pygame.image.load(r"assets\player\hero_idle.png").convert_alpha()
 sprite_sheet_attack = pygame.image.load(r"assets\player\hero_attack.png").convert_alpha()
+
+# Jump and gravity settings
+is_jumping = False
+jump_velocity = 7  # Initial velocity for the jump
+gravity = 0.1      # Gravity force pulling the rectangle down
+vertical_velocity = 0  # Current vertical velocity of the rectangle
 
 # Automatically obtain sprite dimensions
 sprite_height = sprite_sheet_walk.get_height()  # Get the dimensions of the entire sprite sheet
@@ -46,7 +53,7 @@ scaled_player_frame = pygame.transform.scale(player_frame, (scaled_sprite_width,
 
 # Player settings
 rect_x = 400  # Fixed horizontal position
-rect_y = 300  # Starting vertical position
+rect_y = 0  # Starting vertical position
 movement_scale = 0.006  # Adjust this to scale movement to the screen size
 
 # Charging bar settings
@@ -58,16 +65,13 @@ charge_bar_height = 10     # Height of the charging bar
 charge_bar_y_offset = 20   # Distance above the rectangle for the bar
 charge_bar_color = GREEN
 
-# Jump and gravity settings
-is_jumping = False
-jump_velocity = 7  # Initial velocity for the jump
-gravity = 0.1      # Gravity force pulling the rectangle down
-vertical_velocity = 0  # Current vertical velocity of the rectangle
-
 # Attack state
-attacking = False  # Whether the player is attacking
-attack_frame_duration = 0.5  # Duration for the attack animation
+player_attacking = False  # Whether the player is player_attacking
+attack_framef_duration = 0.5  # Duration for the attack animation
 attack_start_time = 0  # Time when the attack starts
+
+# Define platforms the player can jump through from below
+platforms = [pygame.Rect(300, 400, 200, 20), pygame.Rect(100, 300, 150, 20), pygame.Rect(5, 600, 800, 20)]
 
 # Main loop
 running = True
@@ -92,9 +96,9 @@ while running:
             running = False
             
     # Horizontal movement
-    rect_x = min(800 - sprite_width, max(0, rect_x + move_x * movement_scale))
+    rect_x = min(800 - 3*sprite_width/4-6, max(-sprite_width/4+6, rect_x + move_x * movement_scale))
 
-    # Jump mechanics
+   # Jump mechanics
     if not is_jumping and move_y < -480:  # Start jump if joystick pulled up
         is_jumping = True
         vertical_velocity = -jump_velocity  # Move up with initial velocity
@@ -103,94 +107,136 @@ while running:
     if is_jumping:
         rect_y += vertical_velocity  # Update vertical position
         vertical_velocity += gravity  # Apply gravity to the velocity
-        
-        # Stop jumping if on the ground
-        if rect_y >= 600 - sprite_height:
-            rect_y = 600 - sprite_height  # Reset to ground level
-            is_jumping = False          # End the jump
-            vertical_velocity = 0       # Reset vertical velocity
+
+    # Platform collision detection
+    on_platform = False  # Track if player is on any platform
+
+    for platform in platforms:
+        # Check if the player is landing on a platform
+        if vertical_velocity > 0 and rect_y + sprite_height <= platform.top and rect_y + sprite_height + vertical_velocity >= platform.top:
+            if rect_x + 3*sprite_width/4.5 > platform.left and rect_x + sprite_width/3.5 < platform.right:
+                rect_y = platform.top - sprite_height
+                vertical_velocity = 0
+                is_jumping = False
+                on_platform = True  # Mark as on platform
+                break
+
+    # Set to falling if not on any platform
+    if not on_platform:
+        is_jumping = True
+
 
     # Attack when full bar
     if charge_level == max_charge and dist <= 40:
         charge_bar_color = RED
         if dist <= 15:
             charge_level = 0
-            attacking = True
-            attack_start_time = time.time()  # Start the attack animation timer
-    # Filling bar logic
+            player_attacking = True
+            attack_start_time = time.time()
     elif 15 <= dist <= 40:
-        charge_level = min(max_charge, charge_level + charge_speed)  # Increment charge level
+        charge_level = min(max_charge, charge_level + charge_speed)
         charge_bar_color = GREEN
     else:
-        charge_level = max(0, charge_level - charge_speed)  # Reset charge if out of range
+        charge_level = max(0, charge_level - charge_speed)
         charge_bar_color = GREEN
 
-    # Attack animation logic
-    if attacking:
+    # Player Character: Animation logic (walking, idle, attack)
+    if player_attacking:
         if time.time() - attack_start_time < attack_frame_duration:
             if time.time() - last_update_time > animation_speed:
-                current_frame_attack = (current_frame_attack + 1) % frame_count_attack  # Cycle through attack frames
+                current_frame_attack = (current_frame_attack + 1) % frame_count_attack
                 last_update_time = time.time()
-            # Extract the current frame from the attack sprite sheet and scale it
             frame_rect = pygame.Rect(current_frame_attack * sprite_width, 0, sprite_width, sprite_height)
             player_frame = sprite_sheet_attack.subsurface(frame_rect)
             scaled_player_frame = pygame.transform.scale(player_frame, (scaled_sprite_width, scaled_sprite_height))
             scaled_player_frame = pygame.transform.flip(scaled_player_frame, flipped, False)
         else:
-            attacking = False  # End the attack animation after duration
-            current_frame_attack = 0  # Reset to the first frame of the attack animation
+            player_attacking = False
+            current_frame_attack = 0
     else:
-        # Determine if moving or idle
-        if move_x != 0:  # If moving
-            if current_frame_idle != 0:  # Reset idle frame if switching to walking
-                current_frame_idle = 0  # Reset the idle animation frame when starting to walk
+        if move_x != 0:
+            if current_frame_idle != 0:
+                current_frame_idle = 0
             if time.time() - last_update_time > animation_speed:
-                current_frame_walk = (current_frame_walk + 1) % frame_count_walk  # Cycle through walking frames
+                current_frame_walk = (current_frame_walk + 1) % frame_count_walk
                 last_update_time = time.time()
-
-            # Extract the current frame from the walking sprite sheet and scale it
             frame_rect = pygame.Rect(current_frame_walk * sprite_width, 0, sprite_width, sprite_height)
             player_frame = sprite_sheet_walk.subsurface(frame_rect)
-            # Flip image if moving left
             scaled_player_frame = pygame.transform.scale(player_frame, (scaled_sprite_width, scaled_sprite_height))
             scaled_player_frame = pygame.transform.flip(scaled_player_frame, move_x < 0, False)
-            if move_x < 0:
-                flipped = True
-            elif move_x > 0:
-                flipped = False
-        else:  # If idle
-            if current_frame_walk != 0:  # Reset walking frame if switching to idle
-                current_frame_walk = 0  # Reset the walking animation frame when starting to idle
+            flipped = move_x < 0
+        else:
+            if current_frame_walk != 0:
+                current_frame_walk = 0
             if time.time() - last_update_time > animation_speed:
-                current_frame_idle = (current_frame_idle + 1) % frame_count_idle  # Cycle through idle frames
+                current_frame_idle = (current_frame_idle + 1) % frame_count_idle
                 last_update_time = time.time()
-                # Flip image if flipped is true
-                scaled_player_frame = pygame.transform.scale(player_frame, (scaled_sprite_width, scaled_sprite_height))
-                scaled_player_frame = pygame.transform.flip(scaled_player_frame, flipped, False)
-
-            # Extract the current frame from the idle sprite sheet and scale it
             frame_rect = pygame.Rect(current_frame_idle * sprite_width, 0, sprite_width, sprite_height)
             player_frame = sprite_sheet_idle.subsurface(frame_rect)
+            scaled_player_frame = pygame.transform.scale(player_frame, (scaled_sprite_width, scaled_sprite_height))
+            scaled_player_frame = pygame.transform.flip(scaled_player_frame, flipped, False)
 
-    # Calculate the new position to center the scaled image
+
+    # Enemy 1: Animation logic (walking, idle, attack)
+    # Player Character: Animation logic (walking, idle, attack)
+    
+    if player_attacking:
+        if time.time() - attack_start_time < attack_frame_duration:
+            if time.time() - last_update_time > animation_speed:
+                current_frame_attack = (current_frame_attack + 1) % frame_count_attack
+                last_update_time = time.time()
+            frame_rect = pygame.Rect(current_frame_attack * sprite_width, 0, sprite_width, sprite_height)
+            player_frame = sprite_sheet_attack.subsurface(frame_rect)
+            scaled_player_frame = pygame.transform.scale(player_frame, (scaled_sprite_width, scaled_sprite_height))
+            scaled_player_frame = pygame.transform.flip(scaled_player_frame, flipped, False)
+        else:
+            player_attacking = False
+            current_frame_attack = 0
+    else:
+        if move_x != 0:
+            if current_frame_idle != 0:
+                current_frame_idle = 0
+            if time.time() - last_update_time > animation_speed:
+                current_frame_walk = (current_frame_walk + 1) % frame_count_walk
+                last_update_time = time.time()
+            frame_rect = pygame.Rect(current_frame_walk * sprite_width, 0, sprite_width, sprite_height)
+            player_frame = sprite_sheet_walk.subsurface(frame_rect)
+            scaled_player_frame = pygame.transform.scale(player_frame, (scaled_sprite_width, scaled_sprite_height))
+            scaled_player_frame = pygame.transform.flip(scaled_player_frame, move_x < 0, False)
+            flipped = move_x < 0
+        else:
+            if current_frame_walk != 0:
+                current_frame_walk = 0
+            if time.time() - last_update_time > animation_speed:
+                current_frame_idle = (current_frame_idle + 1) % frame_count_idle
+                last_update_time = time.time()
+            frame_rect = pygame.Rect(current_frame_idle * sprite_width, 0, sprite_width, sprite_height)
+            player_frame = sprite_sheet_idle.subsurface(frame_rect)
+            scaled_player_frame = pygame.transform.scale(player_frame, (scaled_sprite_width, scaled_sprite_height))
+            scaled_player_frame = pygame.transform.flip(scaled_player_frame, flipped, False)
+           
+
+
+    # Calculate position to center the scaled image
     draw_x = rect_x + (sprite_width - scaled_sprite_width) // 2
     draw_y = rect_y + (sprite_height - scaled_sprite_height) // 2
 
     # Clear the screen
-    screen.fill(BLACK)
-    
-    screen.blit(bg, (0,0))
-    # Draw the player (scaled animated sprite) centered
+    screen.blit(bg, (0, 0))
+
+    # Draw platforms
+    for platform in platforms:
+        pygame.draw.rect(screen, BLACK, platform)
+
+    # Draw the player
     screen.blit(scaled_player_frame, (draw_x, draw_y))
 
-    # Draw the charging bar above the player only if not attacking
-    if not attacking:
+    # Draw the charge bar
+    if not player_attacking:
         charge_bar_x = rect_x
         charge_bar_y = rect_y - charge_bar_y_offset
         pygame.draw.rect(screen, charge_bar_color, (charge_bar_x, charge_bar_y, charge_level / max_charge * charge_bar_width, charge_bar_height))
 
-    # Update the display
     pygame.display.flip()
 
-# Clean up
 pygame.quit()

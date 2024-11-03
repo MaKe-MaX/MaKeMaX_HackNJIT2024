@@ -1,23 +1,10 @@
 import pygame
 import time
 import src.serialfr as ser
+import src.Game as Game
 
-# Initialize Pygame
-pygame.init()
-screen = pygame.display.set_mode((800, 600))  # Set screen dimensions
-pygame.display.set_caption("Our Game")
 
-serial = ser.serialfr()
-
-# Set up colors
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-GREEN = (0, 255, 0)
-RED = (255, 0, 0)
-ORANGE = (206, 112, 43)
-
-bg = pygame.transform.scale(pygame.image.load(r"assets\backgrounds\orange_background.png"), (screen.get_width(), screen.get_height()))
-
+game = Game.Game()
 # Load sprite sheets
 sprite_sheet_walk = pygame.image.load(r"assets\player\hero_walking.png").convert_alpha()
 sprite_sheet_idle = pygame.image.load(r"assets\player\hero_idle.png").convert_alpha()
@@ -63,9 +50,9 @@ charge_speed = 1           # Speed at which the bar fills
 charge_bar_width = sprite_width
 charge_bar_height = 10     # Height of the charging bar
 charge_bar_y_offset = 20   # Distance above the rectangle for the bar
-charge_bar_color = GREEN
+charge_bar_color = Game.GREEN
 
-# Attack state
+# Attack statef
 player_attacking = False  # Whether the player is player_attacking
 attack_frame_duration = 0.5  # Duration for the attack animation
 attack_start_time = 0  # Time when the attack starts
@@ -79,7 +66,7 @@ flipped = False
 move_x, move_y, buttonOn, dist, distList, data = 0, 0, 0, 0, [0], []
 while running:
     try:
-        data = serial.read()  # Read joystick data
+        data = game.serial.read()  # Read joystick data
         move_x, move_y, buttonOn = data[0], data[1], data[2]
 
         # Only update `dist` if the fourth element is not zero
@@ -128,17 +115,17 @@ while running:
 
     # Attack when full bar
     if charge_level == max_charge and dist <= 40:
-        charge_bar_color = RED
+        charge_bar_color = Game.RED
         if dist <= 15:
             charge_level = 0
             player_attacking = True
             attack_start_time = time.time()
     elif 15 <= dist <= 40:
         charge_level = min(max_charge, charge_level + charge_speed)
-        charge_bar_color = GREEN
+        charge_bar_color = Game.GREEN
     else:
         charge_level = max(0, charge_level - charge_speed)
-        charge_bar_color = GREEN
+        charge_bar_color = Game.GREEN
 
     # Player Character: Animation logic (walking, idle, attack)
     if player_attacking:
@@ -222,20 +209,20 @@ while running:
     draw_y = rect_y + (sprite_height - scaled_sprite_height) // 2
 
     # Clear the screen
-    screen.blit(bg, (0, 0))
+    game.screen.blit(game.bg, (0, 0))
 
     # Draw platforms
     for platform in platforms:
-        pygame.draw.rect(screen, BLACK, platform)
+        pygame.draw.rect(game.screen, Game.BLACK, platform)
 
     # Draw the player
-    screen.blit(scaled_player_frame, (draw_x, draw_y))
+    game.screen.blit(scaled_player_frame, (draw_x, draw_y))
 
     # Draw the charge bar
     if not player_attacking:
         charge_bar_x = rect_x
         charge_bar_y = rect_y - charge_bar_y_offset
-        pygame.draw.rect(screen, charge_bar_color, (charge_bar_x, charge_bar_y, charge_level / max_charge * charge_bar_width, charge_bar_height))
+        pygame.draw.rect(game.screen, charge_bar_color, (charge_bar_x, charge_bar_y, charge_level / max_charge * charge_bar_width, charge_bar_height))
 
     pygame.display.flip()
 

@@ -6,6 +6,7 @@ gravity = 0.1  # Gravity force pulling the rectangle down
 class Character:
     def __init__(self, name, x, y, lives):
         # Load sprite sheets
+        self.name = name
         self.sprite_sheet_walk = pygame.image.load(rf"assets\{name}\walk.png").convert_alpha()
         self.sprite_sheet_idle = pygame.image.load(rf"assets\{name}\idle.png").convert_alpha()
         self.sprite_sheet_hit = pygame.image.load(rf"assets\{name}\whitehit.png").convert_alpha()
@@ -74,14 +75,22 @@ class Character:
         self.death_frame_duration = 0.5
         self.death_start_time = 0
 
-    def take_damage(self):
-        if not self.is_dead and not self.is_hit:
-            self.lives -= 1
-            self.is_hit = True
-            self.hit_start_time = time.time()
-            if self.lives <= 0:
-                self.is_dead = True
-                self.death_start_time = time.time()
+    def give_damage(self, chara):
+        hitbox = False
+        if self.name == r"enemies\accordion_bot":
+            hitbox = (self.rect_y - chara.rect_y)**4 + (self.rect_x - chara.rect_x)**2 <= 90000
+        elif self.name == r"enemies\chunky_bot" or self.name == "player":
+            hitbox = (self.rect_y - chara.rect_y)**2 + (self.rect_x - chara.rect_x)**2 <= 36000 and ( (self.rect_x -  chara.rect_x >= 0) == self.flipped )
+        elif self.name == r"enemies\leg_bot":
+            hitbox = (self.rect_y - chara.rect_y)**2 + (self.rect_x - chara.rect_x)**2 <= 18000 and ( (self.rect_x - chara.rect_x >= 0) == self.flipped )
+        if hitbox: 
+            if not self.is_dead and not self.is_hit:
+                chara.lives -= 1
+                chara.is_hit = True
+                chara.hit_start_time = time.time()
+                if chara.lives <= 0:
+                    chara.is_dead = True
+                    chara.death_start_time = time.time()
 
     def move(self, platforms, move_x, move_y):
         # Horizontal movement
@@ -115,12 +124,15 @@ class Character:
         self.draw_x = self.rect_x + (self.sprite_width - self.scaled_sprite_width) // 2
         self.draw_y = self.rect_y + (self.sprite_height - self.scaled_sprite_height) // 2
 
-    def change_frame(self, move_x, move_y):
+    def update(self, platforms, move_x, move_y):
+        self.move(platforms, move_x, move_y)
         # Player Character: Animation logic (walking, idle, attack, hit, death)
         if self.is_dead:
             if time.time() - self.death_start_time < self.death_frame_duration:
                 if time.time() - self.last_update_time > self.animation_speed:
-                    self.current_frame_death = (self.current_frame_death + 1) % self.frame_count_death
+                    self.current_frame_death = (self.current_frame_death + 1)
+                    if self.current_frame_death == self.frame_count_death - 1:
+                        return True
                     self.current_frame = self.current_frame_death
                     self.last_update_time = time.time()
                 self.frame_rect = pygame.Rect(min(self.current_frame * self.sprite_width, self.sprite_sheet_death.get_width() - self.sprite_width), 0, self.sprite_width, self.sprite_height)
@@ -148,6 +160,7 @@ class Character:
                     self.last_update_time = time.time()
                 self.frame_rect = pygame.Rect(min(self.current_frame * self.sprite_width, self.sprite_sheet_attack.get_width() - self.sprite_width), 0, self.sprite_width, self.sprite_height)
                 self.player_frame = self.sprite_sheet_attack.subsurface(self.frame_rect)
+                print()
                 self.scaled_player_frame = pygame.transform.scale(self.player_frame, (self.scaled_sprite_width, self.scaled_sprite_height))
                 self.scaled_player_frame = pygame.transform.flip(self.scaled_player_frame, self.flipped, False)
             else:
@@ -178,4 +191,3 @@ class Character:
                 self.player_frame = self.sprite_sheet_idle.subsurface(self.frame_rect)
                 self.scaled_player_frame = pygame.transform.scale(self.player_frame, (self.scaled_sprite_width, self.scaled_sprite_height))
                 self.scaled_player_frame = pygame.transform.flip(self.scaled_player_frame, self.flipped, False)
-            

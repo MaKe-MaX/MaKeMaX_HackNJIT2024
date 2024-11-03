@@ -17,9 +17,6 @@ class Game:
         # Initialize Pygame
         pygame.init()
         self.screen = pygame.display.set_mode((800, 600))  # Set screen dimensions
-        pygame.display.set_caption("Our Game")
+        pygame.display.set_caption("SteamPunch")
 
         self.serial = ser.serialfr()
-
-        self.bg = pygame.transform.scale(pygame.image.load(r"assets\backgrounds\orange_background.png"), (self.screen.get_width(), self.screen.get_height()))
-

@@ -7,8 +7,7 @@ import src.Game as Game
 import src.Character as Character
 
 game = Game.Game()
-player = Character.Character(r"player", 400, 0, 3)
-enemy1 = Character.Character(r"enemies\leg_bot", 0, 0, 1)
+player = Character.Character(r"player", 400, 0, 32)
 
 # Charging bar settings
 charge_level = 0           # Current charge level
@@ -19,13 +18,52 @@ charge_bar_height = 10     # Height of the charging bar
 charge_bar_y_offset = 20   # Distance above the rectangle for the bar
 charge_bar_color = Game.GREEN
 
-# Define platforms the player can jump through from below
-platforms = [pygame.Rect(300, 400, 200, 20), pygame.Rect(100, 300, 150, 20), pygame.Rect(5, 600, 800, 20)]
-
 # Main loop
 running = True
 flipped = False
 move_x, move_y, buttonOn, dist, distList, data = 0, 0, 0, 0, [0], []
+
+def game_over():
+    # Display "Game Over" message
+    font = pygame.font.Font(None, 74)  # Choose a font size
+    game_over_text = font.render("Game Over", True, (255, 0, 0))  # Red color
+    text_rect = game_over_text.get_rect(center=(game.screen.get_width() // 2, game.screen.get_height() // 2))
+    game.screen.blit(game_over_text, text_rect)
+    
+    pygame.display.flip()
+    pygame.time.delay(2000)  # Wait for 2 seconds
+
+    # Optionally, ask the player if they want to restart or quit
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+
+
+level = 1
+def level_beat():
+    global enemy, bg, platforms, level
+    if level == 1:
+        enemy = Character.Character(r"enemies\leg_bot", 0, 0, 1)
+        bg = pygame.transform.scale(pygame.image.load(r"assets\backgrounds\orange_background.png"), (800, 600))
+        platforms = [pygame.Rect(300, 400, 200, 20), pygame.Rect(100, 300, 150, 20), pygame.Rect(5, 600, 800, 20)]
+    elif level == 2:
+        enemy = Character.Character(r"enemies\chunky_bot", 0, 0, 2)
+        bg = pygame.transform.scale(pygame.image.load(r"assets\backgrounds\pink_background.png"), (800, 600))
+        platforms = [pygame.Rect(300, 400, 200, 20), pygame.Rect(100, 300, 150, 20), pygame.Rect(5, 600, 800, 20)]
+    elif level == 3:
+        enemy = Character.Character(r"enemies\accordion_bot", 0, 0, 3)
+        bg = pygame.transform.scale(pygame.image.load(r"assets\backgrounds\blue_background.png"), (800, 600))
+        platforms = [pygame.Rect(300, 400, 200, 20), pygame.Rect(100, 300, 150, 20), pygame.Rect(5, 600, 800, 20)]
+    # Boss Fight Coming SOON!
+    elif level == 4:
+        enemy = Character.Character(r"enemies\mother_bot", 0, 0, 5)
+        bg = pygame.transform.scale(pygame.image.load(r"assets\backgrounds\yellow_background.png"), (800, 600))
+        platforms = [pygame.Rect(300, 400, 200, 20), pygame.Rect(100, 300, 150, 20), pygame.Rect(5, 600, 800, 20)]
+    level += 1
+
+level_beat()
 
 while running:
     try:
@@ -44,10 +82,6 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-            
-    # Character method
-    player.move(platforms, move_x, move_y)
-    enemy1.move(platforms, player.rect_x - enemy1.rect_x, (player.rect_y - enemy1.rect_y)*2)
 
     # Attack when full bar
     if charge_level == max_charge and dist <= 40:
@@ -55,7 +89,7 @@ while running:
         if dist <= 15:
             charge_level = 0
             player.is_attacking = True
-            enemy1.take_damage()
+            player.give_damage(enemy)
             player.attack_start_time = time.time()
             player.last_update_time = time.time()
     elif 15 <= dist <= 40:
@@ -64,19 +98,20 @@ while running:
     else:
         charge_level = max(0, charge_level - charge_speed)
         charge_bar_color = Game.GREEN
+        
+    if time.time() - enemy.attack_start_time >= 3:
+        enemy.is_attacking = True
+        enemy.give_damage(player)
+        enemy.attack_start_time = time.time()
+        enemy.last_update_time = time.time()
 
-    if math.dist((player.rect_x,player.rect_y),(enemy1.rect_x,enemy1.rect_y)) < 30:
-        if time.time() - enemy1.attack_start_time >= 3:
-            enemy1.is_attacking = True
-            player.take_damage()
-            enemy1.attack_start_time = time.time()
-            enemy1.last_update_time = time.time()
-
-    player.change_frame(move_x, move_y)
-    enemy1.change_frame(player.rect_x - enemy1.rect_x, (player.rect_y - enemy1.rect_y)*2)
+    if player.update(platforms, move_x, move_y):
+        game_over()
+    if enemy.update(platforms, player.rect_x - enemy.rect_x, (player.rect_y - enemy.rect_y)*2):
+        level_beat()
     
     # Clear the screen
-    game.screen.blit(game.bg, (0, 0))
+    game.screen.blit(bg, (0, 0))
 
     # Draw platforms
     for platform in platforms:
@@ -84,7 +119,7 @@ while running:
 
     # Character method: Draw the player
     game.screen.blit(player.scaled_player_frame, (player.draw_x, player.draw_y))
-    game.screen.blit(enemy1.scaled_player_frame, (enemy1.draw_x, enemy1.draw_y))
+    game.screen.blit(enemy.scaled_player_frame, (enemy.draw_x, enemy.draw_y))
 
     # Draw the charge bar
     if not player.is_attacking:

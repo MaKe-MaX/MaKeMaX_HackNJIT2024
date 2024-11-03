@@ -1,13 +1,16 @@
 import pygame
 import time
-import random
-import math
+import os
 import src.serialfr as ser
 import src.Game as Game
 import src.Character as Character
 
 game = Game.Game()
-player = Character.Character(r"player", 400, 0, 32)
+player = Character.Character(r"player", 400, 0, 5)
+pygame.mixer.init()
+pygame.mixer.music.set_volume(0.25)
+sound = pygame.mixer.Sound(os.path.join(r'assets/music', 'track1.mp3'))
+sound.play()
 
 # Charging bar settings
 charge_level = 0           # Current charge level
@@ -47,20 +50,38 @@ def level_beat():
     if level == 1:
         enemy = Character.Character(r"enemies\leg_bot", 0, 0, 1)
         bg = pygame.transform.scale(pygame.image.load(r"assets\backgrounds\orange_background.png"), (800, 600))
-        platforms = [pygame.Rect(300, 400, 200, 20), pygame.Rect(100, 300, 150, 20), pygame.Rect(5, 600, 800, 20)]
+        platforms = [
+            pygame.Rect(100, 450, 150, 20),  # Adjusted platform positions
+            pygame.Rect(300, 350, 200, 20),
+            pygame.Rect(500, 250, 150, 20),
+            pygame.Rect(0, 600, 800, 20)  # Ground platform
+        ]
     elif level == 2:
         enemy = Character.Character(r"enemies\chunky_bot", 0, 0, 2)
         bg = pygame.transform.scale(pygame.image.load(r"assets\backgrounds\pink_background.png"), (800, 600))
-        platforms = [pygame.Rect(300, 400, 200, 20), pygame.Rect(100, 300, 150, 20), pygame.Rect(5, 600, 800, 20)]
+        platforms = [
+            pygame.Rect(150, 450, 150, 20),
+            pygame.Rect(450, 400, 200, 20),
+            pygame.Rect(200, 250, 150, 20),
+            pygame.Rect(0, 600, 800, 20)  # Ground platform
+        ]
     elif level == 3:
         enemy = Character.Character(r"enemies\accordion_bot", 0, 0, 3)
         bg = pygame.transform.scale(pygame.image.load(r"assets\backgrounds\blue_background.png"), (800, 600))
-        platforms = [pygame.Rect(300, 400, 200, 20), pygame.Rect(100, 300, 150, 20), pygame.Rect(5, 600, 800, 20)]
+        platforms = [
+            pygame.Rect(100, 400, 200, 20),
+            pygame.Rect(400, 300, 150, 20),
+            pygame.Rect(250, 200, 100, 20),
+            pygame.Rect(0, 600, 800, 20)  # Ground platform
+    ]
+
     # Boss Fight Coming SOON!
+    """
     elif level == 4:
         enemy = Character.Character(r"enemies\mother_bot", 0, 0, 5)
         bg = pygame.transform.scale(pygame.image.load(r"assets\backgrounds\yellow_background.png"), (800, 600))
         platforms = [pygame.Rect(300, 400, 200, 20), pygame.Rect(100, 300, 150, 20), pygame.Rect(5, 600, 800, 20)]
+    """
     level += 1
 
 level_beat()

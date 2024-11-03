@@ -123,9 +123,10 @@ class Character:
 
         self.draw_x = self.rect_x + (self.sprite_width - self.scaled_sprite_width) // 2
         self.draw_y = self.rect_y + (self.sprite_height - self.scaled_sprite_height) // 2
-
+    
     def update(self, platforms, move_x, move_y):
-        self.move(platforms, move_x, move_y)
+        if self.lives > 0:
+            self.move(platforms, move_x, move_y)
         # Player Character: Animation logic (walking, idle, attack, hit, death)
         if self.is_dead:
             if time.time() - self.death_start_time < self.death_frame_duration:

@@ -15,16 +15,19 @@ WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
 
 time.sleep(2)  # Wait for the serial connection to initialize
-
-# Load sprite sheet
-sprite_sheet = pygame.image.load(r"assets\player\hero_walking.png").convert_alpha()
+bg = pygame.transform.scale(pygame.image.load(r"assets\backgrounds\orange_background.png"), (screen.get_width(), screen.get_height()))
+# Load sprite sheets
+sprite_sheet_walk = pygame.image.load(r"assets\player\hero_walking.png").convert_alpha()
+sprite_sheet_idle = pygame.image.load(r"assets\player\hero_idle.png").convert_alpha()
 
 # Automatically obtain sprite dimensions
-sprite_height = sprite_sheet.get_height()  # Get the dimensions of the entire sprite sheet
+sprite_height = sprite_sheet_walk.get_height()  # Get the dimensions of the entire sprite sheet
 sprite_width = sprite_height
-frame_count = sprite_sheet.get_width()//sprite_width  # Number of frames in the sprite sheet (assumed to be the same height as sprite_height)
+frame_count_walk = sprite_sheet_walk.get_width() // sprite_width  # Number of frames in the walking sprite sheet
+frame_count_idle = sprite_sheet_idle.get_width() // sprite_width  # Number of frames in the idle sprite sheet
 animation_speed = 0.05  # Speed of animation (time per frame)
-current_frame = 0       # Track the current frame
+current_frame_walk = 0  # Track the current frame for walking
+current_frame_idle = 0   # Track the current frame for idle
 last_update_time = time.time()  # Track time for frame updates
 
 # Scaling factor for the sprite frames
@@ -53,7 +56,7 @@ vertical_velocity = 0  # Current vertical velocity of the rectangle
 
 # Main loop
 running = True
-move_x, move_y, buttonOn, dist, distList = 0, 0, 0, 0, [0]
+move_x, move_y, buttonOn, dist, distList, data = 0, 0, 0, 0, [0], []
 while running:
     try:
         data = serial.read()  # Read joystick data
@@ -67,6 +70,7 @@ while running:
             dist = sum(distList) / len(distList)
     except:
         pass
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -96,15 +100,34 @@ while running:
     else:
         charge_level = max(0, charge_level - charge_speed)  # Reset charge if out of range
 
-    # Update the animation frame based on time
-    if time.time() - last_update_time > animation_speed:
-        current_frame = (current_frame + 1) % frame_count  # Cycle through frames
-        last_update_time = time.time()
+    if charge_level == max_charge and dist <= 15:
+        
 
-    # Extract the current frame from the sprite sheet and scale it
-    frame_rect = pygame.Rect(current_frame * sprite_width, 0, sprite_width, sprite_height)
-    player_frame = sprite_sheet.subsurface(frame_rect)
-    scaled_player_frame = pygame.transform.scale(player_frame, (scaled_sprite_width, scaled_sprite_height))
+    # Determine if moving or idle
+    if move_x != 0:  # If moving
+        if current_frame_idle != 0:  # Reset idle frame if switching to walking
+            current_frame_idle = 0  # Reset the idle animation frame when starting to walk
+        if time.time() - last_update_time > animation_speed:
+            current_frame_walk = (current_frame_walk + 1) % frame_count_walk  # Cycle through walking frames
+            last_update_time = time.time()
+
+        # Extract the current frame from the walking sprite sheet and scale it
+        frame_rect = pygame.Rect(current_frame_walk * sprite_width, 0, sprite_width, sprite_height)
+        player_frame = sprite_sheet_walk.subsurface(frame_rect)
+        # Flip image if moving left
+        scaled_player_frame = pygame.transform.scale(player_frame, (scaled_sprite_width, scaled_sprite_height))
+        scaled_player_frame = pygame.transform.flip(scaled_player_frame, move_x < 0, False)
+    else:  # If idle
+        if current_frame_walk != 0:  # Reset walking frame if switching to idle
+            current_frame_walk = 0  # Reset the walking animation frame when starting to idle
+        if time.time() - last_update_time > animation_speed:
+            current_frame_idle = (current_frame_idle + 1) % frame_count_idle  # Cycle through idle frames
+            last_update_time = time.time()
+
+        # Extract the current frame from the idle sprite sheet and scale it
+        frame_rect = pygame.Rect(current_frame_idle * sprite_width, 0, sprite_width, sprite_height)
+        player_frame = sprite_sheet_idle.subsurface(frame_rect)
+        scaled_player_frame = pygame.transform.scale(player_frame, (scaled_sprite_width, scaled_sprite_height))
 
     # Calculate the new position to center the scaled image
     draw_x = rect_x + (sprite_width - scaled_sprite_width) // 2
@@ -112,7 +135,9 @@ while running:
 
     # Clear the screen
     screen.fill(BLACK)
-
+    
+   
+    screen.blit(bg, (0,0))
     # Draw the player (scaled animated sprite) centered
     screen.blit(scaled_player_frame, (draw_x, draw_y))
 

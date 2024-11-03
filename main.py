@@ -99,18 +99,18 @@ while running:
             is_jumping = False          # End the jump
             vertical_velocity = 0       # Reset vertical velocity
 
-    charge_bar_color = GREEN
     # Attack when full bar
-    if charge_level == max_charge:
+    if charge_level == max_charge and dist <= 40:
         charge_bar_color = RED
         if dist <= 15:
             charge_level = 0
     # Filling bar logic
     elif 15 <= dist <= 40:
         charge_level = min(max_charge, charge_level + charge_speed)  # Increment charge level
-        
+        charge_bar_color = GREEN
     else:
         charge_level = max(0, charge_level - charge_speed)  # Reset charge if out of range\
+        charge_bar_color = GREEN
 
     # Determine if moving or idle
     if move_x != 0:  # If moving

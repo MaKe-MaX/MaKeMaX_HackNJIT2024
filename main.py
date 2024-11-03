@@ -16,14 +16,21 @@ GREEN = (0, 255, 0)
 
 time.sleep(2)  # Wait for the serial connection to initialize
 
-# Rectangle and sprite settings
-sprite_sheet = pygame.image.load(r"assets\enemies\chunky_bot\ChunkyBot - walk.png").convert_alpha()
-sprite_width = 128  # Width of each frame
-sprite_height = 128  # Height of each frame
-frame_count = 12     # Number of frames in the sprite sheet
+# Load sprite sheet
+sprite_sheet = pygame.image.load(r"assets\player\hero_walking.png").convert_alpha()
+
+# Automatically obtain sprite dimensions
+sprite_height = sprite_sheet.get_height()  # Get the dimensions of the entire sprite sheet
+sprite_width = sprite_height
+frame_count = sprite_sheet.get_width()//sprite_width  # Number of frames in the sprite sheet (assumed to be the same height as sprite_height)
 animation_speed = 0.05  # Speed of animation (time per frame)
-current_frame = 0      # Track the current frame
+current_frame = 0       # Track the current frame
 last_update_time = time.time()  # Track time for frame updates
+
+# Scaling factor for the sprite frames
+scale_factor = 2
+scaled_sprite_width = sprite_width * scale_factor
+scaled_sprite_height = sprite_height * scale_factor
 
 # Player settings
 rect_x = 400  # Fixed horizontal position
@@ -94,15 +101,20 @@ while running:
         current_frame = (current_frame + 1) % frame_count  # Cycle through frames
         last_update_time = time.time()
 
-    # Extract the current frame from the sprite sheet
+    # Extract the current frame from the sprite sheet and scale it
     frame_rect = pygame.Rect(current_frame * sprite_width, 0, sprite_width, sprite_height)
     player_frame = sprite_sheet.subsurface(frame_rect)
+    scaled_player_frame = pygame.transform.scale(player_frame, (scaled_sprite_width, scaled_sprite_height))
+
+    # Calculate the new position to center the scaled image
+    draw_x = rect_x + (sprite_width - scaled_sprite_width) // 2
+    draw_y = rect_y + (sprite_height - scaled_sprite_height) // 2
 
     # Clear the screen
     screen.fill(BLACK)
 
-    # Draw the player (animated sprite)
-    screen.blit(player_frame, (rect_x, rect_y))
+    # Draw the player (scaled animated sprite) centered
+    screen.blit(scaled_player_frame, (draw_x, draw_y))
 
     # Draw the charging bar above the player
     charge_bar_x = rect_x

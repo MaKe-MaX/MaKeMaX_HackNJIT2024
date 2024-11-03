@@ -67,7 +67,7 @@ charge_bar_color = GREEN
 
 # Attack state
 player_attacking = False  # Whether the player is player_attacking
-attack_framef_duration = 0.5  # Duration for the attack animation
+attack_frame_duration = 0.5  # Duration for the attack animation
 attack_start_time = 0  # Time when the attack starts
 
 # Define platforms the player can jump through from below

@@ -17,11 +17,11 @@ GREEN = (0, 255, 0)
 time.sleep(2)  # Wait for the serial connection to initialize
 
 # Rectangle and sprite settings
-sprite_sheet = pygame.image.load(r"assets\enemies\accordion_bot\AccordionBot - attack.png").convert_alpha()
+sprite_sheet = pygame.image.load(r"assets\enemies\chunky_bot\ChunkyBot - walk.png").convert_alpha()
 sprite_width = 128  # Width of each frame
 sprite_height = 128  # Height of each frame
-frame_count = 15     # Number of frames in the sprite sheet
-animation_speed = 0.1  # Speed of animation (time per frame)
+frame_count = 12     # Number of frames in the sprite sheet
+animation_speed = 0.05  # Speed of animation (time per frame)
 current_frame = 0      # Track the current frame
 last_update_time = time.time()  # Track time for frame updates
 

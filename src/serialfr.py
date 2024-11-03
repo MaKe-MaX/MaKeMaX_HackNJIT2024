@@ -5,11 +5,16 @@ class serialfr:
     def __init__(self):
         self.serialInst = serial.Serial()
         self.serialInst.baudrate = 19200
-        for x in serial.tools.list_ports.comports():
-            if "Arduino Uno" in x.description:
-                self.serialInst.port = x.name
-        #self.serialInst.port = "COM5"
+        self.serialInst.port = "COM3"
         self.serialInst.open()
+        """for x in serial.tools.list_ports.comports():
+            print(x.description)
+            if "Arduino Uno" in x.description:
+                self.serialInst.baudrate = 19200
+                self.serialInst.port = x.usb_description()
+                self.serialInst.open()"""
+            
+        #self.serialInst.port = "COM5"
 
     def read(self):
         if self.serialInst.in_waiting:

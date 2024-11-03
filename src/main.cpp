@@ -27,8 +27,8 @@ void setup()
 
 void loop()
 {
-  float joy_ry = analogRead(joy_y);
   float joy_rx = analogRead(joy_x);
+  float joy_ry = analogRead(joy_y);
   float distance;
 
   joy_rx = map(joy_rx, 1, 1024, 500, -500);

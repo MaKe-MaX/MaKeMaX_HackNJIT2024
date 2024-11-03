@@ -27,12 +27,12 @@ void setup()
 
 void loop()
 {
-  float joy_rx = analogRead(joy_x);
   float joy_ry = analogRead(joy_y);
+  float joy_rx = analogRead(joy_x);
   float distance;
 
-  joy_rx = map(joy_rx, 1, 1024, -500, 500);
-  joy_ry = map(joy_ry, 1, 1024, -500, 500);
+  joy_rx = map(joy_rx, 1, 1024, 500, -500);
+  joy_ry = map(joy_ry, 1, 1024, 500, -500);
   if(joy_rx < 1 && joy_rx > -20)
     joy_rx = 0;
   if(joy_ry < 20.0 && joy_ry > -5)

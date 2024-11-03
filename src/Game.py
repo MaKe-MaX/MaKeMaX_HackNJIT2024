@@ -8,6 +8,7 @@ WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 ORANGE = (206, 112, 43)
+BLUE = (6, 222, 242)
 
 class Game:
 

@@ -5,8 +5,10 @@ class serialfr:
     def __init__(self):
         self.serialInst = serial.Serial()
         self.serialInst.baudrate = 19200
-        self.serialInst.port = "COM5"
-        print(self.serialInst.port.title)
+        for x in serial.tools.list_ports.comports():
+            if "Arduino Uno" in x.description:
+                self.serialInst.port = x.name
+        #self.serialInst.port = "COM5"
         self.serialInst.open()
 
     def read(self):

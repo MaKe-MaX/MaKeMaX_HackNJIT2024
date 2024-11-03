@@ -39,6 +39,11 @@ scale_factor = 2
 scaled_sprite_width = sprite_width * scale_factor
 scaled_sprite_height = sprite_height * scale_factor
 
+# so that we can idle correctly
+frame_rect = pygame.Rect(current_frame_idle * sprite_width, 0, sprite_width, sprite_height)
+player_frame = sprite_sheet_idle.subsurface(frame_rect)
+scaled_player_frame = pygame.transform.scale(player_frame, (scaled_sprite_width, scaled_sprite_height))
+
 # Player settings
 rect_x = 400  # Fixed horizontal position
 rect_y = 300  # Starting vertical position
@@ -66,6 +71,7 @@ attack_start_time = 0  # Time when the attack starts
 
 # Main loop
 running = True
+flipped = False
 move_x, move_y, buttonOn, dist, distList, data = 0, 0, 0, 0, [0], []
 while running:
     try:
@@ -129,6 +135,7 @@ while running:
             frame_rect = pygame.Rect(current_frame_attack * sprite_width, 0, sprite_width, sprite_height)
             player_frame = sprite_sheet_attack.subsurface(frame_rect)
             scaled_player_frame = pygame.transform.scale(player_frame, (scaled_sprite_width, scaled_sprite_height))
+            scaled_player_frame = pygame.transform.flip(scaled_player_frame, flipped, False)
         else:
             attacking = False  # End the attack animation after duration
             current_frame_attack = 0  # Reset to the first frame of the attack animation
@@ -147,17 +154,23 @@ while running:
             # Flip image if moving left
             scaled_player_frame = pygame.transform.scale(player_frame, (scaled_sprite_width, scaled_sprite_height))
             scaled_player_frame = pygame.transform.flip(scaled_player_frame, move_x < 0, False)
+            if move_x < 0:
+                flipped = True
+            elif move_x > 0:
+                flipped = False
         else:  # If idle
             if current_frame_walk != 0:  # Reset walking frame if switching to idle
                 current_frame_walk = 0  # Reset the walking animation frame when starting to idle
             if time.time() - last_update_time > animation_speed:
                 current_frame_idle = (current_frame_idle + 1) % frame_count_idle  # Cycle through idle frames
                 last_update_time = time.time()
+                # Flip image if flipped is true
+                scaled_player_frame = pygame.transform.scale(player_frame, (scaled_sprite_width, scaled_sprite_height))
+                scaled_player_frame = pygame.transform.flip(scaled_player_frame, flipped, False)
 
             # Extract the current frame from the idle sprite sheet and scale it
             frame_rect = pygame.Rect(current_frame_idle * sprite_width, 0, sprite_width, sprite_height)
             player_frame = sprite_sheet_idle.subsurface(frame_rect)
-            scaled_player_frame = pygame.transform.scale(player_frame, (scaled_sprite_width, scaled_sprite_height))
 
     # Calculate the new position to center the scaled image
     draw_x = rect_x + (sprite_width - scaled_sprite_width) // 2

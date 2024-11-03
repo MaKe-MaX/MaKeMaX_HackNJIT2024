@@ -6,6 +6,7 @@ class serialfr:
         self.serialInst = serial.Serial()
         self.serialInst.baudrate = 19200
         self.serialInst.port = "COM3"
+        print(self.serialInst.port.title)
         self.serialInst.open()
 
     def read(self):

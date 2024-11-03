@@ -8,11 +8,16 @@ gravity = 0.1      # Gravity force pulling the rectangle down
 class Character:
     def __init__(self, name):
         # Load sprite sheets
-        self.sprite_sheet_walk = pygame.image.load(rf"assets\{name}_walking.png").convert_alpha()
-        self.sprite_sheet_idle = pygame.image.load(rf"assets\{name}_idle.png").convert_alpha()
-        self.sprite_sheet_attack = pygame.image.load(rf"assets\{name}_attack.png").convert_alpha()
-        self.sprite_sheet_hit = pygame.image.load(rf"assets\{name}_whitehit.png").convert_alpha()
-        self.sprite_sheet_death = pygame.image.load(rf"assets\{name}_death.png").convert_alpha()
+        self.sprite_sheet_walk = pygame.image.load(rf"assets\{name}\walk.png").convert_alpha()
+        self.sprite_sheet_idle = pygame.image.load(rf"assets\{name}\idle.png").convert_alpha()
+        self.sprite_sheet_attack = pygame.image.load(rf"assets\{name}\attack.png").convert_alpha()
+        self.sprite_sheet_hit = pygame.image.load(rf"assets\{name}\whitehit.png").convert_alpha()
+        self.sprite_sheet_death = pygame.image.load(rf"assets\{name}\death.png").convert_alpha()
+        try:
+            self.sprite_sheet_birth = pygame.image.load(rf"assets\{name}\birth.png").convert_alpha()
+        except:
+            pass
+
 
         # Jump and gravity settings
         self.is_jumping = False

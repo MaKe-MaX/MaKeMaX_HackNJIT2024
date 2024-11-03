@@ -5,7 +5,8 @@ import src.Game as Game
 import src.Character as Character
 
 game = Game.Game()
-player = Character.Character(r"player\hero")
+#player = Character.Character(r"player")
+player = Character.Character(r"enemies\leg_bot")
 
 # Charging bar settings
 charge_level = 0           # Current charge level

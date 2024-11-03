@@ -5,7 +5,7 @@ class serialfr:
     def __init__(self):
         self.serialInst = serial.Serial()
         self.serialInst.baudrate = 19200
-        self.serialInst.port = "COM5"
+        self.serialInst.port = "COM3"
         self.serialInst.open()
 
     def read(self):

@@ -1,27 +1,16 @@
 import serial.tools.list_ports
 
-ports = serial.tools.list_ports.comports()
-serialInst = serial.Serial()
+class serialfr:
 
+    def __init__(self):
+        self.serialInst = serial.Serial()
+        self.serialInst.baudrate = 19200
+        self.serialInst.port = "COM5"
+        self.serialInst.open()
 
-portList = []
-
-for onePort in ports:
-    portList.append(str(onePort))
-    print(str(onePort))
-
-val = input("select Port: COM")
-
-for x in range(0,len(portList)):
-    if portList[x].startswith("COM" + str(val)):
-        portVar = "COM" + str(val)
-        print(portList[x])
-
-serialInst.baudrate = 19200
-serialInst.port = portVar
-serialInst.open()
-
-while True:
-    if serialInst.in_waiting:
-        packet = serialInst.readline()
-        print(packet.decode('utf'))
+    def read(self):
+        if self.serialInst.in_waiting:
+            packet = self.serialInst.readline()
+            lst = packet.decode('utf').split(' ')
+            return float(lst[0]), float(lst[1]), float(lst[2]), float(lst[3])
+        return 0,0,0,0

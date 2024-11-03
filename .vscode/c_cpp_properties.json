@@ -8,7 +8,6 @@
         {
             "name": "PlatformIO",
             "includePath": [
-                "C:/Users/matth/OneDrive/Documents/GitHub/MaKeMaX_HackNJIT2024/include",
                 "C:/Users/matth/OneDrive/Documents/GitHub/MaKeMaX_HackNJIT2024/src",
                 "C:/Users/matth/OneDrive/Documents/GitHub/MaKeMaX_HackNJIT2024/.pio/libdeps/uno/Adafruit CCS811 Library",
                 "C:/Users/matth/OneDrive/Documents/GitHub/MaKeMaX_HackNJIT2024/.pio/libdeps/uno/Adafruit BusIO",
@@ -26,8 +25,7 @@
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
                 "path": [
-                    "C:/Users/matth/OneDrive/Documents/GitHub/MaKeMaX_HackNJIT2024/include",
-                    "C:/Users/matth/OneDrive/Documents/GitHub/MaKeMaX_HackNJIT2024/src",
+                    "C:/Users/matth/OneDrive/Documents/GitHub/MaKeMaX_HackNJIT2024/controls",
                     "C:/Users/matth/OneDrive/Documents/GitHub/MaKeMaX_HackNJIT2024/.pio/libdeps/uno/Adafruit CCS811 Library",
                     "C:/Users/matth/OneDrive/Documents/GitHub/MaKeMaX_HackNJIT2024/.pio/libdeps/uno/Adafruit BusIO",
                     "C:/Users/matth/.platformio/packages/framework-arduino-avr/libraries/SPI/src",

@@ -13,21 +13,25 @@ serial = ser.serialfr()
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
+RED = (255, 0, 0)
 
-time.sleep(2)  # Wait for the serial connection to initialize
 bg = pygame.transform.scale(pygame.image.load(r"assets\backgrounds\orange_background.png"), (screen.get_width(), screen.get_height()))
+
 # Load sprite sheets
 sprite_sheet_walk = pygame.image.load(r"assets\player\hero_walking.png").convert_alpha()
 sprite_sheet_idle = pygame.image.load(r"assets\player\hero_idle.png").convert_alpha()
+sprite_sheet_attack = pygame.image.load(r"assets\player\hero_attack.png").convert_alpha()
 
 # Automatically obtain sprite dimensions
 sprite_height = sprite_sheet_walk.get_height()  # Get the dimensions of the entire sprite sheet
 sprite_width = sprite_height
 frame_count_walk = sprite_sheet_walk.get_width() // sprite_width  # Number of frames in the walking sprite sheet
 frame_count_idle = sprite_sheet_idle.get_width() // sprite_width  # Number of frames in the idle sprite sheet
+frame_count_attack = sprite_sheet_attack.get_width() // sprite_width  # Number of frames in the idle sprite sheet
 animation_speed = 0.05  # Speed of animation (time per frame)
 current_frame_walk = 0  # Track the current frame for walking
 current_frame_idle = 0   # Track the current frame for idle
+current_frame_attack = 0   # Track the current frame for attack
 last_update_time = time.time()  # Track time for frame updates
 
 # Scaling factor for the sprite frames
@@ -47,6 +51,7 @@ charge_speed = 1           # Speed at which the bar fills
 charge_bar_width = sprite_width
 charge_bar_height = 10     # Height of the charging bar
 charge_bar_y_offset = 20   # Distance above the rectangle for the bar
+charge_bar_color = GREEN
 
 # Jump and gravity settings
 is_jumping = False
@@ -94,14 +99,18 @@ while running:
             is_jumping = False          # End the jump
             vertical_velocity = 0       # Reset vertical velocity
 
-    # Charging bar logic
-    if 15 <= dist <= 40:
+    charge_bar_color = GREEN
+    # Attack when full bar
+    if charge_level == max_charge:
+        charge_bar_color = RED
+        if dist <= 15:
+            charge_level = 0
+    # Filling bar logic
+    elif 15 <= dist <= 40:
         charge_level = min(max_charge, charge_level + charge_speed)  # Increment charge level
-    else:
-        charge_level = max(0, charge_level - charge_speed)  # Reset charge if out of range
-
-    if charge_level == max_charge and dist <= 15:
         
+    else:
+        charge_level = max(0, charge_level - charge_speed)  # Reset charge if out of range\
 
     # Determine if moving or idle
     if move_x != 0:  # If moving
@@ -144,7 +153,7 @@ while running:
     # Draw the charging bar above the player
     charge_bar_x = rect_x
     charge_bar_y = rect_y - charge_bar_y_offset
-    pygame.draw.rect(screen, GREEN, (charge_bar_x, charge_bar_y, charge_level / max_charge * charge_bar_width, charge_bar_height))
+    pygame.draw.rect(screen, charge_bar_color, (charge_bar_x, charge_bar_y, charge_level / max_charge * charge_bar_width, charge_bar_height))
 
     # Update the display
     pygame.display.flip()

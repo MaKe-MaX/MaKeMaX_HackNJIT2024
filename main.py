@@ -6,7 +6,11 @@ import src.serialfr as ser
 import src.Game as Game
 import src.Character as Character
 
-controller = input("Are you playing with the controller (y/n)?: ").lower() == "y"
+controller = False
+try:
+    ser
+except:
+    controller = True
 game = Game.Game(controller)
 player = Character.Character(r"player", 400, 0, 5)
 pygame.mixer.init()

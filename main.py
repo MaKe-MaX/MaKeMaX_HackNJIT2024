@@ -1,11 +1,13 @@
 import pygame
 import time
 import os
+import sys
 import src.serialfr as ser
 import src.Game as Game
 import src.Character as Character
 
-game = Game.Game()
+controller = input("Are you playing with the controller (y/n)?: ").lower() == "y"
+game = Game.Game(controller)
 player = Character.Character(r"player", 400, 0, 5)
 pygame.mixer.init()
 pygame.mixer.music.set_volume(0.25)
@@ -76,8 +78,23 @@ def level_beat():
     ]
 
     # Boss Fight Coming SOON!
-    """
+
     elif level == 4:
+        font = pygame.font.Font(None, 74)  # Choose a font size
+        game_over_text = font.render("You Win", True, (255, 0, 0))  # Red color
+        text_rect = game_over_text.get_rect(center=(game.screen.get_width() // 2, game.screen.get_height() // 2))
+        game.screen.blit(game_over_text, text_rect)
+        
+        pygame.display.flip()
+        pygame.time.delay(2000)  # Wait for 2 seconds
+
+        # Optionally, ask the player if they want to restart or quit
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+    """
         enemy = Character.Character(r"enemies\mother_bot", 0, 0, 5)
         bg = pygame.transform.scale(pygame.image.load(r"assets\backgrounds\yellow_background.png"), (800, 600))
         platforms = [pygame.Rect(300, 400, 200, 20), pygame.Rect(100, 300, 150, 20), pygame.Rect(5, 600, 800, 20)]
@@ -87,22 +104,35 @@ def level_beat():
 level_beat()
 
 while running:
-    try:
-        data = game.serial.read()  # Read joystick data
-        move_x, move_y, buttonOn = data[0], data[1], data[2]
+    if controller:
+        try:
+            data = game.serial.read()  # Read joystick data
+            move_x, move_y, buttonOn = data[0], data[1], data[2]
 
-        # Only update `dist` if the fourth element is not zero
-        if data[3] != 0:
-            distList.append(data[3])
-            if len(distList) > 5:
-                distList.pop(0)
-            dist = sum(distList) / len(distList)
-    except:
-        pass
+            # Only update `dist` if the fourth element is not zero
+            if data[3] != 0:
+                distList.append(data[3])
+                if len(distList) > 5:
+                    distList.pop(0)
+                dist = sum(distList) / len(distList)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+        except:
+            pass
+    else:
+        player.movement_scale = 0.004
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+        keys = pygame.key.get_pressed()
 
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+        # Update movement variables based on keys pressed
+        move_x = -500 if keys[pygame.K_LEFT] else 500 if keys[pygame.K_RIGHT] else 0
+        move_y = -500 if keys[pygame.K_UP] else 500 if keys[pygame.K_DOWN] else 0
+        dist = 20 if keys[pygame.K_SPACE] else 10
 
     # Attack when full bar
     if charge_level == max_charge and dist <= 40:

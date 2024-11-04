@@ -12,11 +12,11 @@ BLUE = (6, 222, 242)
 
 class Game:
 
-    def __init__(self):   
+    def __init__(self, controller):   
 
         # Initialize Pygame
         pygame.init()
         self.screen = pygame.display.set_mode((800, 600))  # Set screen dimensions
         pygame.display.set_caption("SteamPunch")
-
-        self.serial = ser.serialfr()
+        if controller:
+            self.serial = ser.serialfr()

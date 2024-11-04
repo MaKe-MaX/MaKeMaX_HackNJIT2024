@@ -60,6 +60,7 @@ class Character:
         self.draw_x = self.rect_x + (self.sprite_width - self.scaled_sprite_width) // 2
         self.draw_y = self.rect_y + (self.sprite_height - self.scaled_sprite_height) // 2
         self.lives = lives
+        self.max_lives = lives
         self.dead = False
 
         # Attack and hit states

@@ -6,11 +6,11 @@ import src.serialfr as ser
 import src.Game as Game
 import src.Character as Character
 
-controller = False
+controller = True
 try:
-    ser
+    ser.serialfr()
 except:
-    controller = True
+    controller = False
 game = Game.Game(controller)
 player = Character.Character(r"player", 400, 0, 5)
 pygame.mixer.init()
@@ -178,9 +178,11 @@ while running:
 
     # Draw the charge bar
     if not player.is_attacking:
-        charge_bar_x = player.rect_x
-        charge_bar_y = player.rect_y - charge_bar_y_offset
-        pygame.draw.rect(game.screen, charge_bar_color, (charge_bar_x, charge_bar_y, charge_level / max_charge * charge_bar_width, charge_bar_height))
+        pygame.draw.rect(game.screen, charge_bar_color, (player.rect_x, player.rect_y - charge_bar_y_offset, charge_level / max_charge * charge_bar_width, charge_bar_height))
+    # Draw the HP bar
+    pygame.draw.rect(game.screen, 'RED', (player.rect_x, player.rect_y - charge_bar_y_offset/2, player.lives / player.max_lives * charge_bar_width, charge_bar_height))
+    pygame.draw.rect(game.screen, 'RED', (enemy.rect_x, enemy.rect_y - charge_bar_y_offset/2, enemy.lives / enemy.max_lives * charge_bar_width, charge_bar_height))
+
 
     pygame.display.flip()
 
